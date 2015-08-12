@@ -149,8 +149,12 @@ class DiceTracker : public FrameProcessor {
 
 		cv::cuda::threshold(d_foreground, d_foreground, 128, 255, cv::THRESH_BINARY);
 		cv::Mat ker = getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-		cv::Ptr<cv::cuda::Filter> open = cv::cuda::createMorphologyFilter(cv::MORPH_OPEN, d_foreground.type(), ker, cv::Point(-1, -1), 2);
-		open->apply(d_foreground, d_foreground);
+		cv::Ptr<cv::cuda::Filter> erode = cv::cuda::createMorphologyFilter(cv::MORPH_ERODE, d_foreground.type(), ker, cv::Point(-1, -1), 1);
+		cv::Ptr<cv::cuda::Filter> dilate = cv::cuda::createMorphologyFilter(cv::MORPH_DILATE, d_foreground.type(), ker, cv::Point(-1, -1), 2);
+		// cv::Ptr<cv::cuda::Filter> open = cv::cuda::createMorphologyFilter(cv::MORPH_OPEN, d_foreground.type(), ker, cv::Point(-1, -1), 1);
+		erode->apply(d_foreground, d_foreground);
+		dilate->apply(d_foreground, d_foreground);
+		// open->apply(d_foreground, d_foreground);
 
 		d_foreground.download(foreground);
 	}

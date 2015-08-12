@@ -40,10 +40,10 @@ int main()
 	processor.setFrameProcessor(&tracker);
 
 	// Declare a window to display the video
-	processor.displayOutput("Tracked Features");
+	// processor.displayOutput("Tracked Features");
 
 	// Play the video at the original frame rate
-	processor.setDelay(1000./processor.getFrameRate());
+	// processor.setDelay(1000./processor.getFrameRate());
 
 	// processor.stopAtFrameNo(10000);
 

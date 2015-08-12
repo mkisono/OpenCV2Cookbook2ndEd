@@ -37,6 +37,7 @@ class DiceTracker : public FrameProcessor {
 
 	DiceTracker() {
 		mog = cv::cuda::createBackgroundSubtractorMOG2();
+		dice_count = 0;
 	}
 	
 	// processing method
@@ -46,64 +47,85 @@ class DiceTracker : public FrameProcessor {
 
 		cv::Mat foreground;
 		extractObjects(frame, foreground);
+		cv::imshow("Foreground", foreground);
 
-		cv::imshow("fore", foreground);
-
-		cv::findContours(foreground,contours,CV_RETR_LIST,CV_CHAIN_APPROX_NONE);
+		cv::findContours(foreground, contours,CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
 		int max_area = processContours();
 
-		if (max_area > 2000 || current_rects.size() > 2) 
-			return;
+		if (max_area < 2000 && current_rects.size() < 3) 
+			detectDice(frame);
 
-		// std::vector<cv::Rect>::const_iterator dice = current_rects.begin();
-		// for (int i=0; dice != current_rects.end(); ++dice, i++) {
+		showDice(output);
 
-		// 	if(!isInside(frame, dice->x, dice->y))
-		// 		break;
-
-		// 	std::vector<cv::Rect>::const_iterator rect = previous_rects.begin();
-		// 	for (; rect != previous_rects.end(); ++rect) {
-		// 	cv::Rect intersection = *rect & *dice;
-		// 	if (intersection.area() > 0) {
-		// 		if (generation[i] == 0) {
-		// 			dice_position[i] = cv::Point2f((dice->x + dice->width/2.0), (dice->y + dice->height/2.0));
-		// 			generation[i]++;
-		// 		}
-		// 		else {
-		// 			if (dice_position[i].inside(*dice)) {
-		// 				dice_position[i] = cv::Point2f((dice->x + dice->width/2.0), (dice->y + dice->height/2.0));
-		// 				generation[i]++;
-		// 				std::cout << "point (" << dice_position[i].x << ", " << dice_position[i].y << ") - count: " << generation[i] << std::endl;
-		// 			}
-		// 			else {
-		// 				generation[i] = 0;
-		// 				std::cout << "reset generation[" << i << "]" << std::endl;
-		// 			}
-		// 		}
-
-		// 		if (generation[i] == 10) {
-
-		// 			cv::Mat roi = output(cv::Rect(dice_position[i].x - 16, dice_position[i].y - 16, 32, 32));
-
-		// 			std::stringstream ss_count;
-		// 			ss_count << dice_count;
-		// 			std::string str = ss_count.str();
-		// 			// cv::imwrite("sg" + std::to_string(dice_count) + ".jpg", roi);
-		// 			cv::imwrite("sg" + str + ".jpg", roi);
-		// 			dice_count++;
-
-		// 			cv::resize(roi, roi, cv::Size(), 3.0, 3.0);
-		// 			if (i == 0){
-		// 				roi.copyTo(dice1);
-		// 			}
-		// 			else {
-		// 				roi.copyTo(dice2);
-		// 			}
-		// 		}
-		// 	}
-		// }
 		std::swap(current_rects, previous_rects);
+	}
+
+	void detectDice(cv::Mat &frame) {
+
+		std::vector<cv::Rect>::const_iterator dice = current_rects.begin();
+		for (int i=0; dice != current_rects.end(); ++dice, i++) {
+
+			if(!isInside(frame, dice->x, dice->y))
+				break;
+
+			std::vector<cv::Rect>::const_iterator rect = previous_rects.begin();
+			for (; rect != previous_rects.end(); ++rect) {
+				cv::Rect intersection = *rect & *dice;
+				if (intersection.area() > 0) {
+					if (generation[i] == 0) {
+						dice_position[i] = cv::Point2f((dice->x + dice->width/2.0), (dice->y + dice->height/2.0));
+						generation[i]++;
+					}
+					else {
+						if (dice_position[i].inside(*dice)) {
+							dice_position[i] = cv::Point2f((dice->x + dice->width/2.0), (dice->y + dice->height/2.0));
+							generation[i]++;
+							std::cout << "point (" << dice_position[i].x << ", " << dice_position[i].y << ") - count: " << generation[i] << std::endl;
+						}
+						else {
+							generation[i] = 0;
+							std::cout << "reset generation[" << i << "]" << std::endl;
+						}
+					}
+
+					if (generation[i] == 10) {
+
+						cv::Mat roi = frame(cv::Rect(dice_position[i].x - 16, dice_position[i].y - 16, 32, 32));
+
+						std::stringstream ss_count;
+						ss_count << dice_count;
+						std::string str = ss_count.str();
+						// cv::imwrite("sg" + std::to_string(dice_count) + ".jpg", roi);
+						cv::imwrite("/home/mkisono/Dropbox/dice/data/sg" + str + ".jpg", roi);
+						dice_count++;
+
+						cv::resize(roi, roi, cv::Size(), 3.0, 3.0);
+						if (i == 0){
+							roi.copyTo(dice1);
+						}
+						else {
+							roi.copyTo(dice2);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void showDice(cv::Mat &output) {
+
+		int y = (output.rows / 2) - 48;
+		cv::Rect dice1_position = cv::Rect(20, y, 96, 96);
+		cv::Rect dice2_position = cv::Rect(140, y, 96, 96);
+		cv::rectangle(output, dice1_position, cv::Scalar(128,128,128), 2);
+		cv::rectangle(output, dice2_position, cv::Scalar(128,128,128), 2);
+
+		cv::Mat dice1_show = output(dice1_position);
+		cv::Mat dice2_show = output(dice2_position);
+
+		dice1.copyTo(dice1_show);
+		dice2.copyTo(dice2_show);
 	}
 
 	int processContours() {

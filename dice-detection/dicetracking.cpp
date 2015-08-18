@@ -23,7 +23,7 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/video/tracking.hpp>
 
-#include "dicetracker.h"
+#include "dicetracker2.h"
 
 int main()
 {

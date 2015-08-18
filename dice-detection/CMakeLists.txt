@@ -14,6 +14,8 @@ project("${project_name}")
 find_package( OpenCV REQUIRED )
 MESSAGE("OpenCV version : ${OpenCV_VERSION}")
 
+set (CMAKE_CXX_FLAGS "-stdlib=libstdc++")
+
 # add opencv include directories to the project
 include_directories( ${OpenCV_INCLUDE_DIRS} ) 
 # add include directory

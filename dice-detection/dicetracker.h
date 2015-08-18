@@ -10,10 +10,10 @@
 
 #include "opencv2/cudaimgproc.hpp"
 #include "opencv2/cudaarithm.hpp"
-#include "opencv2/cudawarping.hpp"
-#include "opencv2/cudafeatures2d.hpp"
+// #include "opencv2/cudawarping.hpp"
+// #include "opencv2/cudafeatures2d.hpp"
 #include "opencv2/cudafilters.hpp"
-#include "opencv2/cudaoptflow.hpp"
+// #include "opencv2/cudaoptflow.hpp"
 #include "opencv2/cudabgsegm.hpp"
 
 #include "videoprocessor.h"
@@ -97,7 +97,7 @@ class DiceTracker : public FrameProcessor {
 						ss_count << dice_count;
 						std::string str = ss_count.str();
 						// cv::imwrite("sg" + std::to_string(dice_count) + ".jpg", roi);
-						cv::imwrite("/home/mkisono/Dropbox/dice/data/sg" + str + ".jpg", roi);
+						cv::imwrite("/home/mkisono/Dropbox/dice/data/mafa" + str + ".jpg", roi);
 						dice_count++;
 
 						cv::resize(roi, roi, cv::Size(), 3.0, 3.0);
@@ -155,7 +155,7 @@ class DiceTracker : public FrameProcessor {
 			x > (frame.cols - ROI_SIZE) ||
 			y > (frame.rows - ROI_SIZE)) {
 
-			std::cout << "(" << x << ", " << y << ") - out of bounds" << std::endl;
+			// std::cout << "(" << x << ", " << y << ") - out of bounds" << std::endl;
 			return false;
 		}
 

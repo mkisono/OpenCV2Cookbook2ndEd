@@ -34,7 +34,7 @@ int main()
 	DiceTracker tracker;
 
 	// Open video file
-	processor.setInput("../data/sg.mov");
+	processor.setInput("../data/mafa.mov");
 
 	// set frame processor
 	processor.setFrameProcessor(&tracker);
